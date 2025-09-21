@@ -2,7 +2,7 @@ name: synthesize
 
 on:
   push:
-    paths: ["**/*.vhd", "**/*.vhdl", "**/*.v", "scripts/**", ".github/workflows/*_synth.yml"]
+    paths: ["**/*.vhd", "**/*.vhdl", "**/*.v", "scripts/**", ".github/workflows/*synth.yml"]
   pull_request:
 
 jobs:

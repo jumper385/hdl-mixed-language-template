@@ -2,33 +2,32 @@
 
 ## Introduction
 
-This template enables you to synthesize mixed-language HDL projects (VHDL + Verilog) targeting ICE40 FPGAs. It demonstrates how to seamlessly integrate VHDL and Verilog modules in a single design using modern open-source synthesis tools.
+This template enables you to synthesize mixed-language HDL projects (VHDL + Verilog) targeting ICE40 FPGAs.
 
 ### Goals
+- **Open Source Toolchain**: Uses only free, open-source FPGA tools
 - **Mixed Language Support**: Combine VHDL and Verilog in a single project
-- **Open Source Toolchain**: Use only free, open-source FPGA tools
-- **Automated Synthesis**: GitHub Actions CI/CD for continuous integration
-- **Extensible Design**: Easy template for starting new mixed-language projects
+- **Automated Synthesis**: GitHub Actions to quickly build after commits
 
 ### Backend Technologies
-- **[Yosys](https://yosyshq.net/yosys/)**: Open-source synthesis suite for Verilog and VHDL
+- **[Yosys](https://yosyshq.net/yosys/)**: Open-source synthesis suite for Verilog
 - **[GHDL](https://github.com/ghdl/ghdl)**: Open-source VHDL simulator and synthesizer
-- **[GHDL-Yosys Plugin](https://github.com/ghdl/ghdl-yosys-plugin)**: Bridge between GHDL and Yosys for VHDL synthesis
-- **[nextpnr](https://github.com/YosysHQ/nextpnr)**: Portable FPGA place-and-route tool for ICE40
+- **[GHDL-Yosys Plugin](https://github.com/ghdl/ghdl-yosys-plugin)**: Translates VHDL into YosysIR
+- **[nextpnr](https://github.com/YosysHQ/nextpnr)**: Portable FPGA place-and-route tool for ICE40 and other FPGAs
 - **[IceStorm](https://github.com/YosysHQ/icestorm)**: Bitstream generation tools for Lattice ICE40 FPGAs
 
 ### Build Automation
 The project includes automated GitHub Actions workflows that:
 - Trigger on HDL file changes (`.vhd`, `.vhdl`, `.v`)
-- Use containerized synthesis environment (`hdlc/ghdl:yosys`)
+- Uses the `hdlc/ghdl:yosys` container
 - Generate synthesis artifacts (JSON, ASC, BIN files)
 - Upload build artifacts for download
 
-## Project Structure
+## Example Project Structure
 
 ```
 ├── .github/workflows/
-│   └── synth.yml           # GitHub Actions CI workflow
+│   └── synth.yml           # GitHub Actions workflow
 ├── scripts/
 │   └── ice40up5k_synth.ys  # Yosys synthesis script
 ├── vhdl/
@@ -74,34 +73,42 @@ Modify `io.pcf` to match your design's I/O:
 set_io signal_name pin_number
 ```
 
-For ICE40UP5K-SG48 package pin mapping, refer to the [ICE40 Family Data Sheet](https://www.latticesemi.com/Products/FPGAandCPLD/iCE40Ultra).
+## Environment Setup
+The key dependancies (yosys, ghdl and ghdl-yosys-plugin) were originally built from source on an Ubuntu 24.04 Server VM. The steps are as follows. 
 
-## Manual Build Requirements
-
-### System Dependencies
+Download Build Dependancies:
 ```bash
-# Ubuntu/Debian
-sudo apt update
-sudo apt install -y \
-    yosys \
-    ghdl \
-    nextpnr-ice40 \
-    fpga-icestorm \
-    ghdl-yosys-plugin
+cd ..
+sudo apt-get install build-essential clang bison flex libreadline-dev gawk tcl-dev libffi-dev git graphviz xdot pkg-config python3 libboost-system-dev libboost-python-dev libboost-filesystem-dev zlib1g-dev
+```
 
-# Fedora/RHEL
-sudo dnf install -y \
-    yosys \
-    ghdl \
-    nextpnr \
-    icestorm
+Build Yosys:
+```bash
+git clone https://github.com/YosysHQ/yosys
+cd yosys
+make config-gcc
+make
+sudo make install
+```
 
-# Arch Linux
-sudo pacman -S \
-    yosys \
-    ghdl \
-    nextpnr \
-    icestorm
+Build GHDL:
+```bash
+cd ..
+sudo apt install gnat-10
+git clone https://github.com/ghdl/ghdl
+cd ghdl
+./configure --prefix=/usr/local
+make
+sudo make install
+```
+
+Build ghdl-yosys-plugin:
+```bash
+cd ..
+git clone https://github.com/ghdl/ghdl-yosys-plugin
+cd ghdl-yosys-plugin
+make
+sudo cp ghdl.so /usr/local/share/yosys/plugins/ghdl.so
 ```
 
 ### Docker Alternative
@@ -111,7 +118,7 @@ docker run --rm -v $(pwd):/work -w /work hdlc/ghdl:yosys \
     bash -c "apt update && apt install nextpnr-ice40 fpga-icestorm -y && yosys -s scripts/ice40up5k_synth.ys"
 ```
 
-## Manual Build Instructions
+## Manual IP Build Instructions
 
 ### 1. Verify Tool Installation
 ```bash
@@ -168,7 +175,3 @@ To target different FPGA families:
 - [Yosys Documentation](https://yosyshq.readthedocs.io/)
 - [GHDL Documentation](https://ghdl.readthedocs.io/)
 - [ICE40 Tools](https://github.com/YosysHQ/icestorm)
-
-## License
-
-This template is provided as-is for educational and development purposes.

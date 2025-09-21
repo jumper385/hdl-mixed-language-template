@@ -24,10 +24,15 @@ jobs:
           yosys -V
           yosys -s scripts/ice40up5k_synth.ys
 
+      - name: get current date
+	id: date
+        run: |
+          echo "now=$(date + '%y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: synth-artifacts
+          name: synth_artifacts_${{ steps.date.outputs.now }}
           path: |
             build/*
             *.json

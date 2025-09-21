@@ -25,7 +25,7 @@ jobs:
           yosys -s scripts/ice40up5k_synth.ys
 
       - name: get current date
-	id: date
+        id: date
         run: |
           echo "now=$(date + '%y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
 
